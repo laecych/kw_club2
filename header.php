@@ -1,0 +1,66 @@
+<?php
+//載入XOOPS主設定檔（必要）
+require_once dirname(dirname(__DIR__)) . '/mainfile.php';
+xoops_loadLanguage('main', basename(__DIR__));
+
+//載入自訂的共同函數檔
+$semester_name_arr = [
+'00' => _MD_KWCLUB_YEAR_TEXT_00, 
+'01' => _MD_KWCLUB_YEAR_TEXT_01, 
+'11' => _MD_KWCLUB_YEAR_TEXT_11, 
+'02' => _MD_KWCLUB_YEAR_TEXT_02 ];
+
+$grade_name_arr    = [
+    _MD_KWCLUB_GRADE0, _MD_KWCLUB_GRADE1, _MD_KWCLUB_GRADE2, _MD_KWCLUB_GRADE3, _MD_KWCLUB_GRADE4, _MD_KWCLUB_GRADE5, _MD_KWCLUB_GRADE6, _MD_KWCLUB_GRADE7, _MD_KWCLUB_GRADE8, _MD_KWCLUB_GRADE9, _MD_KWCLUB_GRADE10, _MD_KWCLUB_GRADE11, _MD_KWCLUB_GRADE12];
+
+require_once __DIR__ . '/function.php';
+
+if ($xoopsUser) {
+    //判斷是否對該模組有管理權限（通常就是站長了）
+    if (!isset($_SESSION['is_kw_club_Admin'])) {
+        $_SESSION['is_kw_club_Admin'] = $xoopsUser->isAdmin($xoopsModule->mid());
+    }
+
+    //是否為「社團管理」的用戶
+    if (!isset($_SESSION['isclubAdmin'])) {
+        $_SESSION['isclubAdmin'] = $_SESSION['is_kw_club_Admin'] ? true : isclub(_MD_KWCLUB_ADMIN_GROUP);
+    }
+
+    //是否為「社團老師」的用戶
+    if (!isset($_SESSION['isclubUser'])) {
+        $_SESSION['isclubUser'] = $_SESSION['isclubAdmin'] ? true : isclub(_MD_KWCLUB_TEACHER_GROUP);
+    }
+} else {
+    unset($_SESSION['is_kw_club_Admin']);
+    unset($_SESSION['isclubAdmin']);
+    unset($_SESSION['isclubUser']);
+}
+
+
+//工具列設定
+$interface_menu[_MD_KWCLUB_INDEX_MYCLASS] = 'index.php?op=myclass';
+$interface_icon[_MD_KWCLUB_INDEX_MYCLASS] = 'fa-chevron-right';
+
+$interface_menu[_MD_KWCLUB_INDEX_TEACHER] = 'index.php?op=teacher';
+$interface_icon[_MD_KWCLUB_INDEX_TEACHER] = 'fa-chevron-right';
+
+if ($_SESSION['isclubUser'] && kw_club_chk_time('return', true)) {
+    $interface_menu[_MD_KWCLUB_INDEX_FORM] = 'club.php';
+    $interface_icon[_MD_KWCLUB_INDEX_FORM] = 'fa-chevron-right';
+}
+
+if ($_SESSION['isclubAdmin']) {
+    $interface_menu[_MD_KWCLUB_REG] = 'register.php';
+    $interface_icon[_MD_KWCLUB_REG] = 'fa-chevron-right';
+
+    $interface_menu[_MD_KWCLUB_SETUP] = 'config.php';
+    $interface_icon[_MD_KWCLUB_SETUP] = 'fa-chevron-right';
+}
+
+//模組後台
+if ($_SESSION['is_kw_club_Admin']) {
+    $interface_menu[_TAD_TO_ADMIN] = 'admin/main.php';
+    $interface_icon[_TAD_TO_ADMIN] = 'fa-chevron-right';
+}
+
+
